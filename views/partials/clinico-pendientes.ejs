@@ -1,0 +1,31 @@
+<%# Tabla de aplicaciones pendientes. Recibe: lista, tipos, mostrarAnimal %>
+<div class="table-wrap">
+<table class="table">
+  <thead>
+    <tr>
+      <th>Próxima fecha</th><th>Estado</th>
+      <% if (mostrarAnimal) { %><th>Animal</th><% } %>
+      <th>Tipo</th><th>Producto</th><th>Dosis</th><th>Última aplicación</th><th class="actions no-print">Acción</th>
+    </tr>
+  </thead>
+  <tbody>
+  <% lista.forEach((p) => {
+       const estado = p.dias_restantes < 0 ? 'vencida' : (p.dias_restantes <= 7 ? 'pronto' : 'programada');
+       const texto = p.dias_restantes < 0 ? `Vencida hace ${-p.dias_restantes} día(s)`
+         : (p.dias_restantes === 0 ? 'Hoy' : `En ${p.dias_restantes} día(s)`); %>
+    <tr class="<%= estado === 'vencida' ? 'row-danger' : '' %>">
+      <td><%= h.fecha(p.proxima_fecha) %></td>
+      <td><span class="badge badge-<%= estado %>"><%= texto %></span></td>
+      <% if (mostrarAnimal) { %>
+        <td><a href="/alimentacion/animales/<%= p.animal_id %>"><%= p.animal_nombre %></a><br><small class="muted"><%= p.especie %></small></td>
+      <% } %>
+      <td><span class="badge badge-<%= p.tipo %>"><%= tipos[p.tipo] %></span></td>
+      <td><%= p.producto %></td>
+      <td><%= p.dosis %></td>
+      <td><%= h.fecha(p.fecha_aplicacion) %></td>
+      <td class="actions no-print"><a class="btn btn-small btn-success" href="/clinico/registros/nuevo?repetir=<%= p.id %>">Registrar aplicación</a></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>

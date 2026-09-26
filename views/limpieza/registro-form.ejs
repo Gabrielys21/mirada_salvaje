@@ -1,0 +1,57 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1><%= title %></h1>
+</div>
+<%- include('partials/limpieza-tabs') %>
+
+<section class="card form-card">
+  <%- include('partials/errores') %>
+  <form method="post" action="/limpieza/registros<%= registro.id ? '/' + registro.id : '' %>" class="form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <label>Área *
+      <select name="area_id" required>
+        <option value="">Selecciona un área…</option>
+        <% areas.forEach((a) => { %>
+          <option value="<%= a.id %>" <%= registro.area_id === a.id ? 'selected' : '' %>><%= a.nombre %> (<%= tipos[a.tipo] %>)</option>
+        <% }) %>
+      </select>
+    </label>
+
+    <label>Fecha *
+      <input type="date" name="fecha" value="<%= registro.fecha || '' %>" required>
+    </label>
+
+    <label>Encargado *
+      <% if (admin) { %>
+        <select name="encargado_id" required>
+          <option value="">Selecciona un encargado…</option>
+          <% encargados.forEach((u) => { %>
+            <option value="<%= u.id %>" <%= registro.encargado_id === u.id ? 'selected' : '' %>><%= u.nombre %></option>
+          <% }) %>
+        </select>
+      <% } else { %>
+        <input type="text" value="<%= encargados[0].nombre %>" disabled>
+        <small class="muted">Los empleados registran limpiezas a su propio nombre.</small>
+      <% } %>
+    </label>
+
+    <label>Estado *
+      <select name="estado" required>
+        <% Object.entries(estados).forEach(([valor, etiqueta]) => { %>
+          <option value="<%= valor %>" <%= registro.estado === valor ? 'selected' : '' %>><%= etiqueta %></option>
+        <% }) %>
+      </select>
+    </label>
+
+    <label>Observaciones
+      <textarea name="observaciones" rows="3" maxlength="500"><%= registro.observaciones || '' %></textarea>
+    </label>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Guardar</button>
+      <a class="btn btn-link" href="/limpieza/registros">Cancelar</a>
+    </div>
+  </form>
+</section>
+<%- include('partials/footer') %>

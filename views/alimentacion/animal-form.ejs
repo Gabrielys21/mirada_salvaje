@@ -1,0 +1,54 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1><%= title %></h1>
+</div>
+<%- include('partials/alimentacion-tabs') %>
+
+<section class="card form-card">
+  <%- include('partials/errores') %>
+  <form method="post" action="/alimentacion/animales<%= animal.id ? '/' + animal.id : '' %>" class="form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <label>Nombre *
+      <input type="text" name="nombre" value="<%= animal.nombre %>" maxlength="100" required>
+    </label>
+    <label>Especie *
+      <input type="text" name="especie" value="<%= animal.especie %>" maxlength="100" required placeholder="Ej. León africano">
+    </label>
+    <label>Sexo
+      <select name="sexo">
+        <option value="">No determinado</option>
+        <% Object.entries(sexos).forEach(([valor, etiqueta]) => { %>
+          <option value="<%= valor %>" <%= animal.sexo === valor ? 'selected' : '' %>><%= etiqueta %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Fecha de nacimiento
+      <input type="date" name="fecha_nacimiento" value="<%= animal.fecha_nacimiento || '' %>" max="<%= h.hoy() %>">
+    </label>
+    <label>Área / hábitat
+      <select name="area_id">
+        <option value="">Sin asignar</option>
+        <% areas.forEach((a) => { %>
+          <option value="<%= a.id %>" <%= animal.area_id === a.id ? 'selected' : '' %>><%= a.nombre %> (<%= tiposArea[a.tipo] %>)</option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Observaciones
+      <textarea name="observaciones" rows="3" maxlength="500"><%= animal.observaciones || '' %></textarea>
+    </label>
+
+    <% if (animal.id) { %>
+      <label class="check"><input type="checkbox" name="activo" <%= animal.activo ? 'checked' : '' %>> Animal activo</label>
+      <small class="muted">Los animales inactivos (trasladados o fallecidos) conservan su historial, pero no cuentan para el consumo diario.</small>
+    <% } else { %>
+      <input type="hidden" name="activo" value="on">
+    <% } %>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Guardar</button>
+      <a class="btn btn-link" href="/alimentacion/animales<%= animal.id ? '/' + animal.id : '' %>">Cancelar</a>
+    </div>
+  </form>
+</section>
+<%- include('partials/footer') %>

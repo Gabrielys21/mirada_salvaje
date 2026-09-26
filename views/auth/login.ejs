@@ -1,0 +1,17 @@
+<%- include('partials/header') %>
+<section class="login-card card">
+  <h1>🦁 Mirada Salvaje</h1>
+  <p class="muted">Sistema de control del zoológico</p>
+  <%- include('partials/errores') %>
+  <form method="post" action="/login" class="form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+    <label>Usuario
+      <input type="text" name="username" value="<%= username %>" autocomplete="username" maxlength="50" required autofocus>
+    </label>
+    <label>Contraseña
+      <input type="password" name="password" autocomplete="current-password" maxlength="72" required>
+    </label>
+    <button class="btn btn-primary btn-block" type="submit">Iniciar sesión</button>
+  </form>
+</section>
+<%- include('partials/footer') %>

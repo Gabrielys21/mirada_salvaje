@@ -1,0 +1,24 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Usuarios</h1>
+  <a class="btn btn-primary" href="/usuarios/nuevo">+ Nuevo usuario</a>
+</div>
+
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Nombre</th><th>Usuario</th><th>Rol</th><th>Estado</th><th>Creado</th><th class="actions">Acciones</th></tr></thead>
+  <tbody>
+  <% usuarios.forEach((u) => { %>
+    <tr class="<%= u.activo ? '' : 'row-muted' %>">
+      <td><%= u.nombre %><%= u.id === currentUser.id ? ' (tú)' : '' %></td>
+      <td><%= u.username %></td>
+      <td><span class="badge badge-<%= u.rol %>"><%= roles[u.rol] %></span></td>
+      <td><span class="badge <%= u.activo ? 'badge-completado' : 'badge-inactivo' %>"><%= u.activo ? 'Activo' : 'Inactivo' %></span></td>
+      <td><%= h.fechaHora(u.created_at) %></td>
+      <td class="actions"><a class="btn btn-small" href="/usuarios/<%= u.id %>/editar">Editar</a></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<%- include('partials/footer') %>

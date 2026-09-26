@@ -1,0 +1,65 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Alimentación</h1>
+  <a class="btn btn-primary" href="/alimentacion/movimientos/nuevo">+ Registrar movimiento</a>
+</div>
+<%- include('partials/alimentacion-tabs') %>
+
+<form class="filters card" method="get" action="/alimentacion/movimientos">
+  <label>Desde <input type="date" name="desde" value="<%= filtros.desde || '' %>"></label>
+  <label>Hasta <input type="date" name="hasta" value="<%= filtros.hasta || '' %>"></label>
+  <label>Alimento
+    <select name="alimento_id">
+      <option value="">Todos</option>
+      <% alimentos.forEach((al) => { %>
+        <option value="<%= al.id %>" <%= filtros.alimentoId === al.id ? 'selected' : '' %>><%= al.nombre %></option>
+      <% }) %>
+    </select>
+  </label>
+  <label>Tipo
+    <select name="tipo">
+      <option value="">Todos</option>
+      <% Object.entries(tipos).forEach(([valor, etiqueta]) => { %>
+        <option value="<%= valor %>" <%= filtros.tipo === valor ? 'selected' : '' %>><%= etiqueta %></option>
+      <% }) %>
+    </select>
+  </label>
+  <div class="filters-actions">
+    <button class="btn" type="submit">Filtrar</button>
+    <a class="btn btn-link" href="/alimentacion/movimientos">Limpiar</a>
+  </div>
+</form>
+
+<% if (!movimientos.length) { %>
+  <p class="empty">No hay movimientos con esos filtros.</p>
+<% } else { %>
+<div class="table-wrap">
+<table class="table">
+  <thead>
+    <tr><th>Fecha</th><th>Alimento</th><th>Tipo</th><th class="num">Cantidad</th><th>Registró</th><th>Observaciones</th><% if (currentUser.rol === 'admin') { %><th class="actions">Acciones</th><% } %></tr>
+  </thead>
+  <tbody>
+  <% movimientos.forEach((m) => { %>
+    <tr>
+      <td><%= h.fecha(m.fecha) %></td>
+      <td><a href="/alimentacion/inventario/<%= m.alimento_id %>"><%= m.alimento_nombre %></a></td>
+      <td><span class="badge badge-<%= m.tipo %>"><%= tipos[m.tipo] %></span></td>
+      <td class="num"><%= m.tipo === 'salida' ? '−' : '+' %><%= h.cantidad(m.cantidad) %> <%= m.unidad %></td>
+      <td><%= m.usuario_nombre %></td>
+      <td class="wrap"><%= m.observaciones || '—' %></td>
+      <% if (currentUser.rol === 'admin') { %>
+      <td class="actions">
+        <form method="post" action="/alimentacion/movimientos/<%= m.id %>/eliminar" class="inline" data-confirm="¿Anular este movimiento? El stock se ajustará automáticamente.">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button class="btn btn-small btn-danger" type="submit">Anular</button>
+        </form>
+      </td>
+      <% } %>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<p class="muted"><%= movimientos.length %> movimiento(s)<%= movimientos.length >= 500 ? ' (se muestran los 500 más recientes; usa los filtros)' : '' %>.</p>
+<% } %>
+<%- include('partials/footer') %>

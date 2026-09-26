@@ -1,0 +1,56 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Entradas</h1>
+  <% if (currentUser.rol === 'admin') { %>
+    <a class="btn btn-primary" href="/entradas/promociones/nueva">+ Nueva promoción</a>
+  <% } %>
+</div>
+<%- include('partials/entradas-tabs') %>
+
+<form class="filters card" method="get" action="/entradas/promociones">
+  <label>Estado
+    <select name="estado">
+      <option value="">Todas</option>
+      <% Object.entries(estados).forEach(([valor, etiqueta]) => { %>
+        <option value="<%= valor %>" <%= estado === valor ? 'selected' : '' %>><%= etiqueta %></option>
+      <% }) %>
+    </select>
+  </label>
+  <div class="filters-actions">
+    <button class="btn" type="submit">Filtrar</button>
+    <a class="btn btn-link" href="/entradas/promociones">Limpiar</a>
+  </div>
+</form>
+
+<% if (!promociones.length) { %>
+  <p class="empty">No hay promociones<%= estado ? ' con ese estado' : '' %>.</p>
+<% } else { %>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Promoción</th><th class="num">Descuento</th><th>Aplica a</th><th>Vigencia</th><th>Estado</th><th class="num">Ventas</th><% if (currentUser.rol === 'admin') { %><th class="actions">Acciones</th><% } %></tr></thead>
+  <tbody>
+  <% promociones.forEach((p) => { %>
+    <tr class="<%= p.estado === 'vigente' ? '' : 'row-muted' %>">
+      <td><strong><%= p.nombre %></strong><% if (p.descripcion) { %><br><small class="muted"><%= p.descripcion %></small><% } %></td>
+      <td class="num"><%= h.cantidad(p.porcentaje_descuento) %>%</td>
+      <td><%= p.tipo_entrada_nombre || 'Todas las entradas' %></td>
+      <td><%= h.fecha(p.fecha_inicio) %> – <%= h.fecha(p.fecha_fin) %></td>
+      <td><span class="badge badge-promo-<%= p.estado %>"><%= estados[p.estado] %></span></td>
+      <td class="num"><%= p.total_ventas %></td>
+      <% if (currentUser.rol === 'admin') { %>
+      <td class="actions">
+        <a class="btn btn-small" href="/entradas/promociones/<%= p.id %>/editar">Editar</a>
+        <form method="post" action="/entradas/promociones/<%= p.id %>/eliminar" class="inline" data-confirm="¿Eliminar la promoción «<%= p.nombre %>»?">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button class="btn btn-small btn-danger" type="submit">Eliminar</button>
+        </form>
+      </td>
+      <% } %>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<p class="muted">Si varias promociones vigentes aplican a la misma entrada, en la venta se usa la de mayor descuento.</p>
+<% } %>
+<%- include('partials/footer') %>

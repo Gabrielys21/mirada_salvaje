@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= locals.title ? title + ' · ' : '' %>Mirada Salvaje</title>
+  <link rel="stylesheet" href="/css/styles.css">
+  <script src="/js/app.js" defer></script>
+</head>
+<body>
+<% const usuario = locals.currentUser; const ruta = locals.currentPath || ''; %>
+<% if (usuario) { %>
+<header class="topbar">
+  <a class="brand" href="/">🦁 Mirada Salvaje</a>
+  <nav class="nav">
+    <a href="/" class="<%= ruta === '/' ? 'active' : '' %>">Inicio</a>
+    <a href="/limpieza/registros" class="<%= ruta.startsWith('/limpieza') ? 'active' : '' %>">Limpieza</a>
+    <a href="/alimentacion/animales" class="<%= ruta.startsWith('/alimentacion') ? 'active' : '' %>">Alimentación</a>
+    <a href="/clinico/registros" class="<%= ruta.startsWith('/clinico') ? 'active' : '' %>">Control clínico</a>
+    <a href="/entradas/ventas/nueva" class="<%= ruta.startsWith('/entradas') ? 'active' : '' %>">Entradas</a>
+    <% if (usuario.rol === 'admin') { %>
+      <a href="/usuarios" class="<%= ruta.startsWith('/usuarios') ? 'active' : '' %>">Usuarios</a>
+    <% } %>
+  </nav>
+  <div class="user">
+    <span><%= usuario.nombre %> <small class="badge badge-<%= usuario.rol %>"><%= usuario.rol %></small></span>
+    <form method="post" action="/logout">
+      <input type="hidden" name="_csrf" value="<%= locals.csrfToken %>">
+      <button class="btn btn-small btn-light" type="submit">Salir</button>
+    </form>
+  </div>
+</header>
+<% } %>
+<main class="container">
+<% if (locals.flash) { %>
+  <div class="alert alert-<%= flash.tipo %>" role="status"><%= flash.mensaje %></div>
+<% } %>

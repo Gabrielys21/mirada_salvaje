@@ -1,0 +1,53 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1><%= title %></h1>
+</div>
+<%- include('partials/alimentacion-tabs') %>
+
+<section class="card form-card">
+  <%- include('partials/errores') %>
+  <form method="post" action="/alimentacion/inventario<%= alimento.id ? '/' + alimento.id : '' %>" class="form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <label>Nombre *
+      <input type="text" name="nombre" value="<%= alimento.nombre %>" maxlength="100" required placeholder="Ej. Carne de res">
+    </label>
+    <label>Tipo *
+      <select name="tipo" required>
+        <option value="">Selecciona un tipo…</option>
+        <% Object.entries(tipos).forEach(([valor, etiqueta]) => { %>
+          <option value="<%= valor %>" <%= alimento.tipo === valor ? 'selected' : '' %>><%= etiqueta %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Unidad de medida *
+      <select name="unidad" required>
+        <option value="">Selecciona una unidad…</option>
+        <% Object.entries(unidades).forEach(([valor, etiqueta]) => { %>
+          <option value="<%= valor %>" <%= alimento.unidad === valor ? 'selected' : '' %>><%= etiqueta %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Stock mínimo
+      <input type="number" name="stock_minimo" value="<%= alimento.stock_minimo %>" min="0" step="0.01">
+      <small class="muted">Al llegar a este nivel se muestra la alerta de stock bajo.</small>
+    </label>
+
+    <% if (alimento.id) { %>
+      <p class="muted">Stock actual: <strong><%= h.cantidad(alimento.stock) %></strong>. Para modificarlo registra una
+        <a href="/alimentacion/movimientos/nuevo?alimento_id=<%= alimento.id %>&tipo=entrada">entrada</a> o
+        <a href="/alimentacion/movimientos/nuevo?alimento_id=<%= alimento.id %>&tipo=salida">salida</a>.</p>
+    <% } else { %>
+      <label>Stock inicial
+        <input type="number" name="stock_inicial" value="<%= alimento.stock_inicial %>" min="0" step="0.01">
+        <small class="muted">Se registra como una entrada con fecha de hoy.</small>
+      </label>
+    <% } %>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Guardar</button>
+      <a class="btn btn-link" href="/alimentacion/inventario<%= alimento.id ? '/' + alimento.id : '' %>">Cancelar</a>
+    </div>
+  </form>
+</section>
+<%- include('partials/footer') %>

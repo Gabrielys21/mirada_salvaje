@@ -1,0 +1,48 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1><%= title %></h1>
+</div>
+<%- include('partials/alimentacion-tabs') %>
+
+<section class="card form-card">
+  <%- include('partials/errores') %>
+  <% if (!alimentos.length) { %>
+    <div class="alert alert-aviso">Primero registra alimentos en el <a href="/alimentacion/inventario">inventario</a>.</div>
+  <% } %>
+  <form method="post" action="/alimentacion/dietas<%= dieta.id ? '/' + dieta.id : '' %>" class="form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <label>Animal *
+      <select name="animal_id" required>
+        <option value="">Selecciona un animal…</option>
+        <% animales.forEach((a) => { %>
+          <option value="<%= a.id %>" <%= dieta.animal_id === a.id ? 'selected' : '' %>><%= a.nombre %> (<%= a.especie %>)</option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Alimento *
+      <select name="alimento_id" required>
+        <option value="">Selecciona un alimento…</option>
+        <% alimentos.forEach((al) => { %>
+          <option value="<%= al.id %>" <%= dieta.alimento_id === al.id ? 'selected' : '' %>><%= al.nombre %> (<%= unidades[al.unidad] %>)</option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Cantidad por ración *
+      <input type="number" name="cantidad" value="<%= dieta.cantidad %>" min="0.01" step="0.01" required>
+      <small class="muted">En la unidad del alimento seleccionado.</small>
+    </label>
+    <label>Horario *
+      <input type="time" name="horario" value="<%= h.hora(dieta.horario) %>" required>
+    </label>
+    <label>Observaciones
+      <input type="text" name="observaciones" value="<%= dieta.observaciones || '' %>" maxlength="255" placeholder="Ej. troceado, sin hueso">
+    </label>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Guardar</button>
+      <a class="btn btn-link" href="/alimentacion/dietas<%= dieta.animal_id ? '?animal_id=' + dieta.animal_id : '' %>">Cancelar</a>
+    </div>
+  </form>
+</section>
+<%- include('partials/footer') %>

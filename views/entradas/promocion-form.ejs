@@ -1,0 +1,50 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1><%= title %></h1>
+</div>
+<%- include('partials/entradas-tabs') %>
+
+<section class="card form-card">
+  <%- include('partials/errores') %>
+  <form method="post" action="/entradas/promociones<%= promocion.id ? '/' + promocion.id : '' %>" class="form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <label>Nombre *
+      <input type="text" name="nombre" value="<%= promocion.nombre %>" maxlength="100" required placeholder="Ej. Martes familiar">
+    </label>
+    <label>Descripción
+      <input type="text" name="descripcion" value="<%= promocion.descripcion || '' %>" maxlength="255">
+    </label>
+    <label>Descuento (%) *
+      <input type="number" name="porcentaje_descuento" value="<%= promocion.porcentaje_descuento %>" min="0.01" max="100" step="0.01" required>
+    </label>
+    <label>Aplica a
+      <select name="tipo_entrada_id">
+        <option value="">Todas las entradas</option>
+        <% tipos.forEach((t) => { %>
+          <option value="<%= t.id %>" <%= promocion.tipo_entrada_id === t.id ? 'selected' : '' %>><%= t.nombre %> (<%= h.moneda(t.precio) %>)<%= t.activo ? '' : ' — inactivo' %></option>
+        <% }) %>
+      </select>
+    </label>
+    <div class="form-row">
+      <label>Vigente desde *
+        <input type="date" name="fecha_inicio" value="<%= promocion.fecha_inicio || '' %>" required>
+      </label>
+      <label>Hasta (inclusive) *
+        <input type="date" name="fecha_fin" value="<%= promocion.fecha_fin || '' %>" required>
+      </label>
+    </div>
+
+    <% if (promocion.id) { %>
+      <label class="check"><input type="checkbox" name="activo" <%= promocion.activo ? 'checked' : '' %>> Promoción activa</label>
+    <% } else { %>
+      <input type="hidden" name="activo" value="on">
+    <% } %>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Guardar</button>
+      <a class="btn btn-link" href="/entradas/promociones">Cancelar</a>
+    </div>
+  </form>
+</section>
+<%- include('partials/footer') %>

@@ -1,0 +1,51 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1><%= title %></h1>
+</div>
+<%- include('partials/clinico-tabs') %>
+
+<section class="card form-card">
+  <%- include('partials/errores') %>
+  <form method="post" action="/clinico/registros<%= registro.id ? '/' + registro.id : '' %>" class="form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <label>Animal *
+      <select name="animal_id" required>
+        <option value="">Selecciona un animal…</option>
+        <% animales.forEach((a) => { %>
+          <option value="<%= a.id %>" <%= registro.animal_id === a.id ? 'selected' : '' %>><%= a.nombre %> (<%= a.especie %>)</option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Tipo *
+      <select name="tipo" required>
+        <option value="">Selecciona…</option>
+        <% Object.entries(tipos).forEach(([valor, etiqueta]) => { %>
+          <option value="<%= valor %>" <%= registro.tipo === valor ? 'selected' : '' %>><%= etiqueta %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Producto *
+      <input type="text" name="producto" value="<%= registro.producto %>" maxlength="100" required placeholder="Ej. Vacuna antirrábica, Ivermectina, Vitamina B12">
+    </label>
+    <label>Dosis *
+      <input type="text" name="dosis" value="<%= registro.dosis %>" maxlength="50" required placeholder="Ej. 2 ml, 1 tableta">
+    </label>
+    <label>Fecha de aplicación *
+      <input type="date" name="fecha_aplicacion" value="<%= registro.fecha_aplicacion || '' %>" max="<%= h.hoy() %>" required>
+    </label>
+    <label>Próxima aplicación
+      <input type="date" name="proxima_fecha" value="<%= registro.proxima_fecha || '' %>">
+      <small class="muted">Déjala vacía si el tratamiento no requiere otra dosis.</small>
+    </label>
+    <label>Observaciones
+      <textarea name="observaciones" rows="3" maxlength="500"><%= registro.observaciones || '' %></textarea>
+    </label>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Guardar</button>
+      <a class="btn btn-link" href="/clinico/registros<%= registro.animal_id ? '?animal_id=' + registro.animal_id : '' %>">Cancelar</a>
+    </div>
+  </form>
+</section>
+<%- include('partials/footer') %>

@@ -1,0 +1,49 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Hola, <%= currentUser.nombre %></h1>
+  <span class="muted"><%= h.fecha(h.hoy()) %></span>
+</div>
+
+<div class="stats">
+  <a class="stat" href="/limpieza/registros?estado=pendiente&hasta=<%= h.hoy() %>">
+    <span class="stat-num"><%= limpiezasPendientes %></span>
+    <span class="stat-label">Limpiezas pendientes (hasta hoy)</span>
+  </a>
+  <a class="stat" href="/limpieza/registros?estado=pendiente&mias=1">
+    <span class="stat-num"><%= misLimpiezasPendientes %></span>
+    <span class="stat-label">Mis limpiezas pendientes</span>
+  </a>
+  <a class="stat <%= alimentosBajos ? 'stat-alerta' : '' %>" href="/alimentacion/inventario?bajos=1">
+    <span class="stat-num"><%= alimentosBajos %></span>
+    <span class="stat-label">Alimentos con stock bajo</span>
+  </a>
+  <a class="stat <%= clinico.vencidas ? 'stat-alerta' : '' %>" href="/clinico/reporte?dias=7">
+    <span class="stat-num"><%= clinico.vencidas %> / <%= clinico.proximas %></span>
+    <span class="stat-label">Aplicaciones clínicas vencidas / próximos 7 días</span>
+  </a>
+  <a class="stat" href="/entradas/ventas">
+    <span class="stat-num"><%= h.moneda(ventasHoy.ingresos) %></span>
+    <span class="stat-label">Ventas de hoy (<%= ventasHoy.boletos %> boleto(s), <%= promocionesVigentes %> promoción(es) vigente(s))</span>
+  </a>
+</div>
+
+<h2>Módulos</h2>
+<div class="modules">
+  <a class="module card" href="/limpieza/registros">
+    <h3>🧹 Limpieza</h3>
+    <p>Áreas, registros de limpieza y reporte por fechas.</p>
+  </a>
+  <a class="module card" href="/alimentacion/animales">
+    <h3>🍖 Alimentación</h3>
+    <p>Animales, dietas, inventario de alimentos y reporte de consumo.</p>
+  </a>
+  <a class="module card" href="/clinico/registros">
+    <h3>💉 Control clínico</h3>
+    <p>Medicamentos, vacunas y vitaminas por animal, y próximas aplicaciones.</p>
+  </a>
+  <a class="module card" href="/entradas/ventas/nueva">
+    <h3>🎟️ Entradas y promociones</h3>
+    <p>Tipos de entrada, promociones con vigencia, venta de boletos y reporte de ventas.</p>
+  </a>
+</div>
+<%- include('partials/footer') %>

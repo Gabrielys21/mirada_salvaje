@@ -1,0 +1,93 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1><%= animal.nombre %> <small class="muted"><%= animal.especie %></small></h1>
+  <% if (currentUser.rol === 'admin') { %>
+    <div class="form-actions">
+      <a class="btn" href="/alimentacion/animales/<%= animal.id %>/editar">Editar</a>
+      <form method="post" action="/alimentacion/animales/<%= animal.id %>/eliminar" class="inline" data-confirm="¿Eliminar a «<%= animal.nombre %>» y todas sus dietas? (Si tiene historial clínico no se podrá eliminar.)">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn-danger" type="submit">Eliminar</button>
+      </form>
+    </div>
+  <% } %>
+</div>
+<%- include('partials/alimentacion-tabs') %>
+
+<section class="card">
+  <dl class="detail">
+    <dt>Estado</dt><dd><span class="badge <%= animal.activo ? 'badge-completado' : 'badge-inactivo' %>"><%= animal.activo ? 'Activo' : 'Inactivo' %></span></dd>
+    <dt>Sexo</dt><dd><%= sexos[animal.sexo] || 'No determinado' %></dd>
+    <dt>Nacimiento</dt><dd><%= animal.fecha_nacimiento ? h.fecha(animal.fecha_nacimiento) : '—' %></dd>
+    <dt>Área</dt><dd><%= animal.area_nombre || '—' %></dd>
+    <dt>Observaciones</dt><dd><%= animal.observaciones || '—' %></dd>
+  </dl>
+</section>
+
+<div class="page-head">
+  <h2>Dieta diaria</h2>
+  <% if (currentUser.rol === 'admin' && animal.activo) { %>
+    <a class="btn btn-primary btn-small" href="/alimentacion/dietas/nueva?animal_id=<%= animal.id %>">+ Agregar ración</a>
+  <% } %>
+</div>
+<% if (!dietas.length) { %>
+  <p class="empty">Este animal no tiene dietas registradas.</p>
+<% } else { %>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Horario</th><th>Alimento</th><th class="num">Cantidad</th><th>Observaciones</th></tr></thead>
+  <tbody>
+  <% dietas.forEach((d) => { %>
+    <tr>
+      <td><%= h.hora(d.horario) %></td>
+      <td><a href="/alimentacion/inventario/<%= d.alimento_id %>"><%= d.alimento_nombre %></a></td>
+      <td class="num"><%= h.cantidad(d.cantidad) %> <%= d.unidad %></td>
+      <td class="wrap"><%= d.observaciones || '—' %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<% } %>
+
+<div class="page-head">
+  <h2>Próximas aplicaciones</h2>
+</div>
+<% if (!pendientes.length) { %>
+  <p class="empty">Sin aplicaciones programadas.</p>
+<% } else { %>
+  <%- include('partials/clinico-pendientes', { lista: pendientes, tipos: tiposClinicos, mostrarAnimal: false }) %>
+<% } %>
+
+<div class="page-head">
+  <h2>Historial clínico</h2>
+  <div class="form-actions">
+    <% if (animal.activo) { %>
+      <a class="btn btn-primary btn-small" href="/clinico/registros/nuevo?animal_id=<%= animal.id %>">+ Registrar aplicación</a>
+    <% } %>
+    <a class="btn btn-link" href="/clinico/registros?animal_id=<%= animal.id %>">Ver historial completo</a>
+  </div>
+</div>
+<% if (!historial.length) { %>
+  <p class="empty">Sin registros clínicos.</p>
+<% } else { %>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Aplicación</th><th>Tipo</th><th>Producto</th><th>Dosis</th><th>Próxima</th><th>Registró</th><th>Observaciones</th></tr></thead>
+  <tbody>
+  <% historial.forEach((r) => { %>
+    <tr>
+      <td><%= h.fecha(r.fecha_aplicacion) %></td>
+      <td><span class="badge badge-<%= r.tipo %>"><%= tiposClinicos[r.tipo] %></span></td>
+      <td><%= r.producto %></td>
+      <td><%= r.dosis %></td>
+      <td><%= r.proxima_fecha ? h.fecha(r.proxima_fecha) : '—' %></td>
+      <td><%= r.registrado_por_nombre %></td>
+      <td class="wrap"><%= r.observaciones || '—' %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<% if (historial.length >= 20) { %><p class="muted">Se muestran las 20 aplicaciones más recientes.</p><% } %>
+<% } %>
+<%- include('partials/footer') %>

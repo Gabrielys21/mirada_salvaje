@@ -1,0 +1,58 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Vender entradas</h1>
+  <span class="muted"><%= h.fecha(h.hoy()) %></span>
+</div>
+<%- include('partials/entradas-tabs') %>
+
+<% if (!precios.length) { %>
+  <p class="empty">No hay tipos de entrada activos.
+    <% if (currentUser.rol === 'admin') { %><a href="/entradas/tipos/nuevo">Crea uno</a> para empezar a vender.<% } %></p>
+<% } else { %>
+<div class="split">
+  <section class="card form-card">
+    <%- include('partials/errores') %>
+    <form method="post" action="/entradas/ventas" class="form" data-venta>
+      <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+      <label>Tipo de entrada *
+        <select name="tipo_entrada_id" required>
+          <option value="">Selecciona…</option>
+          <% precios.forEach((p) => { %>
+            <option value="<%= p.id %>" data-precio="<%= p.precio %>" data-descuento="<%= p.porcentaje_descuento %>" <%= venta.tipo_entrada_id === p.id ? 'selected' : '' %>>
+              <%= p.nombre %> — <%= h.moneda(p.precio_final) %><%= p.promocion_id ? ` (${h.cantidad(p.porcentaje_descuento)}% ${p.promocion_nombre})` : '' %>
+            </option>
+          <% }) %>
+        </select>
+      </label>
+      <label>Cantidad *
+        <input type="number" name="cantidad" value="<%= venta.cantidad %>" min="1" max="100" step="1" required>
+      </label>
+      <p class="total-venta">Total: <strong data-total>—</strong></p>
+      <div class="form-actions">
+        <button class="btn btn-primary" type="submit">Registrar venta</button>
+      </div>
+      <small class="muted">La promoción vigente de mayor descuento se aplica automáticamente.</small>
+    </form>
+  </section>
+
+  <section>
+    <h2>Precios de hoy</h2>
+    <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Entrada</th><th class="num">Precio</th><th>Promoción</th><th class="num">Precio final</th></tr></thead>
+      <tbody>
+      <% precios.forEach((p) => { %>
+        <tr>
+          <td><%= p.nombre %><% if (p.descripcion) { %><br><small class="muted"><%= p.descripcion %></small><% } %></td>
+          <td class="num"><%= h.moneda(p.precio) %></td>
+          <td><%= p.promocion_id ? `${p.promocion_nombre} (−${h.cantidad(p.porcentaje_descuento)}%)` : '—' %></td>
+          <td class="num"><strong><%= h.moneda(p.precio_final) %></strong></td>
+        </tr>
+      <% }) %>
+      </tbody>
+    </table>
+    </div>
+  </section>
+</div>
+<% } %>
+<%- include('partials/footer') %>

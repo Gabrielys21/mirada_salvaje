@@ -1,0 +1,21 @@
+# Blueprint de Render para el sistema del zoológico Mirada Salvaje.
+# Crea el Web Service; la base de datos PostgreSQL ya existe y se conecta con DATABASE_URL.
+# Los valores secretos NO van en este archivo: se configuran en el dashboard de Render.
+services:
+  - type: web
+    name: zoologico-mirada-salvaje
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node src/app.js
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # Render genera un valor aleatorio al crear el servicio.
+      - key: SESSION_SECRET
+        generateValue: true
+      # Pegar en el dashboard la "Internal Database URL" de la base de Render (misma región que este servicio).
+      - key: DATABASE_URL
+        sync: false

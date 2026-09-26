@@ -1,0 +1,39 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Entradas</h1>
+  <% if (currentUser.rol === 'admin') { %>
+    <a class="btn btn-primary" href="/entradas/tipos/nuevo">+ Nuevo tipo de entrada</a>
+  <% } %>
+</div>
+<%- include('partials/entradas-tabs') %>
+
+<% if (!tipos.length) { %>
+  <p class="empty">No hay tipos de entrada. <% if (currentUser.rol === 'admin') { %><a href="/entradas/tipos/nuevo">Crea el primero</a> (general, estudiante, niño…).<% } %></p>
+<% } else { %>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Nombre</th><th class="num">Precio</th><th>Descripción</th><th>Estado</th><th class="num">Ventas</th><% if (currentUser.rol === 'admin') { %><th class="actions">Acciones</th><% } %></tr></thead>
+  <tbody>
+  <% tipos.forEach((t) => { %>
+    <tr class="<%= t.activo ? '' : 'row-muted' %>">
+      <td><%= t.nombre %></td>
+      <td class="num"><%= h.moneda(t.precio) %></td>
+      <td class="wrap"><%= t.descripcion || '—' %></td>
+      <td><span class="badge <%= t.activo ? 'badge-completado' : 'badge-inactivo' %>"><%= t.activo ? 'Activo' : 'Inactivo' %></span></td>
+      <td class="num"><%= t.total_ventas %></td>
+      <% if (currentUser.rol === 'admin') { %>
+      <td class="actions">
+        <a class="btn btn-small" href="/entradas/tipos/<%= t.id %>/editar">Editar</a>
+        <form method="post" action="/entradas/tipos/<%= t.id %>/eliminar" class="inline" data-confirm="¿Eliminar «<%= t.nombre %>»? También se eliminarán sus promociones exclusivas.">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button class="btn btn-small btn-danger" type="submit">Eliminar</button>
+        </form>
+      </td>
+      <% } %>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<% } %>
+<%- include('partials/footer') %>

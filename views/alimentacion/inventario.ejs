@@ -1,0 +1,64 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Alimentación</h1>
+  <div class="form-actions">
+    <a class="btn" href="/alimentacion/movimientos/nuevo">Registrar entrada / salida</a>
+    <% if (currentUser.rol === 'admin') { %>
+      <a class="btn btn-primary" href="/alimentacion/inventario/nuevo">+ Nuevo alimento</a>
+    <% } %>
+  </div>
+</div>
+<%- include('partials/alimentacion-tabs') %>
+
+<% if (totalBajos) { %>
+  <div class="alert alert-aviso" role="alert">
+    ⚠️ <strong><%= totalBajos %></strong> alimento(s) con stock en o por debajo del mínimo.
+    <% if (!filtros.soloBajos) { %><a href="/alimentacion/inventario?bajos=1">Ver solo esos</a><% } %>
+  </div>
+<% } %>
+
+<form class="filters card" method="get" action="/alimentacion/inventario">
+  <label>Buscar <input type="search" name="texto" value="<%= filtros.texto %>" placeholder="Nombre" maxlength="100"></label>
+  <label>Tipo
+    <select name="tipo">
+      <option value="">Todos</option>
+      <% Object.entries(tipos).forEach(([valor, etiqueta]) => { %>
+        <option value="<%= valor %>" <%= filtros.tipo === valor ? 'selected' : '' %>><%= etiqueta %></option>
+      <% }) %>
+    </select>
+  </label>
+  <label class="check"><input type="checkbox" name="bajos" value="1" <%= filtros.soloBajos ? 'checked' : '' %>> Solo stock bajo</label>
+  <div class="filters-actions">
+    <button class="btn" type="submit">Filtrar</button>
+    <a class="btn btn-link" href="/alimentacion/inventario">Limpiar</a>
+  </div>
+</form>
+
+<% if (!alimentos.length) { %>
+  <p class="empty">No hay alimentos con esos filtros.</p>
+<% } else { %>
+<div class="table-wrap">
+<table class="table">
+  <thead>
+    <tr><th>Alimento</th><th>Tipo</th><th class="num">Stock</th><th class="num">Mínimo</th><th class="num">Consumo diario</th><th>Estado</th><th class="actions">Acciones</th></tr>
+  </thead>
+  <tbody>
+  <% alimentos.forEach((al) => { %>
+    <tr class="<%= al.estado_stock === 'ok' ? '' : 'row-warning' %>">
+      <td><a href="/alimentacion/inventario/<%= al.id %>"><%= al.nombre %></a></td>
+      <td><%= tipos[al.tipo] %></td>
+      <td class="num"><strong><%= h.cantidad(al.stock) %></strong> <%= al.unidad %></td>
+      <td class="num"><%= h.cantidad(al.stock_minimo) %> <%= al.unidad %></td>
+      <td class="num"><%= al.consumo_diario ? h.cantidad(al.consumo_diario) + ' ' + al.unidad : '—' %></td>
+      <td><span class="badge badge-<%= al.estado_stock %>"><%= estadosStock[al.estado_stock] %></span></td>
+      <td class="actions">
+        <a class="btn btn-small btn-success" href="/alimentacion/movimientos/nuevo?alimento_id=<%= al.id %>&tipo=entrada">+ Entrada</a>
+        <a class="btn btn-small" href="/alimentacion/movimientos/nuevo?alimento_id=<%= al.id %>&tipo=salida">− Salida</a>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<% } %>
+<%- include('partials/footer') %>

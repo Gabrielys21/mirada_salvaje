@@ -1,0 +1,73 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Control clínico<%= animalFiltrado ? ' · ' + animalFiltrado.nombre : '' %></h1>
+  <a class="btn btn-primary" href="/clinico/registros/nuevo<%= filtros.animalId ? '?animal_id=' + filtros.animalId : '' %>">+ Nuevo registro</a>
+</div>
+<%- include('partials/clinico-tabs') %>
+
+<form class="filters card" method="get" action="/clinico/registros">
+  <label>Animal
+    <select name="animal_id">
+      <option value="">Todos</option>
+      <% animales.forEach((a) => { %>
+        <option value="<%= a.id %>" <%= filtros.animalId === a.id ? 'selected' : '' %>><%= a.nombre %> (<%= a.especie %>)<%= a.activo ? '' : ' — inactivo' %></option>
+      <% }) %>
+    </select>
+  </label>
+  <label>Tipo
+    <select name="tipo">
+      <option value="">Todos</option>
+      <% Object.entries(tipos).forEach(([valor, etiqueta]) => { %>
+        <option value="<%= valor %>" <%= filtros.tipo === valor ? 'selected' : '' %>><%= etiqueta %></option>
+      <% }) %>
+    </select>
+  </label>
+  <label>Producto <input type="search" name="texto" value="<%= filtros.texto %>" maxlength="100" placeholder="Ej. Rabia"></label>
+  <label>Aplicado desde <input type="date" name="desde" value="<%= filtros.desde || '' %>"></label>
+  <label>Hasta <input type="date" name="hasta" value="<%= filtros.hasta || '' %>"></label>
+  <div class="filters-actions">
+    <button class="btn" type="submit">Filtrar</button>
+    <button class="btn" type="submit" name="formato" value="csv">Exportar CSV</button>
+    <a class="btn btn-link" href="/clinico/registros">Limpiar</a>
+  </div>
+</form>
+
+<% if (!registros.length) { %>
+  <p class="empty">No hay registros clínicos con esos filtros.</p>
+<% } else { %>
+<div class="table-wrap">
+<table class="table">
+  <thead>
+    <tr><th>Aplicación</th><th>Animal</th><th>Tipo</th><th>Producto</th><th>Dosis</th><th>Próxima</th><th>Registró</th><th>Observaciones</th><th class="actions">Acciones</th></tr>
+  </thead>
+  <tbody>
+  <% registros.forEach((r) => {
+       const puede = currentUser.rol === 'admin' || r.registrado_por === currentUser.id; %>
+    <tr class="<%= r.animal_activo ? '' : 'row-muted' %>">
+      <td><%= h.fecha(r.fecha_aplicacion) %></td>
+      <td><a href="/alimentacion/animales/<%= r.animal_id %>"><%= r.animal_nombre %></a><br><small class="muted"><%= r.especie %></small></td>
+      <td><span class="badge badge-<%= r.tipo %>"><%= tipos[r.tipo] %></span></td>
+      <td><%= r.producto %></td>
+      <td><%= r.dosis %></td>
+      <td><%= r.proxima_fecha ? h.fecha(r.proxima_fecha) : '—' %></td>
+      <td><%= r.registrado_por_nombre %></td>
+      <td class="wrap"><%= r.observaciones || '—' %></td>
+      <td class="actions">
+        <% if (puede) { %>
+          <a class="btn btn-small" href="/clinico/registros/<%= r.id %>/editar">Editar</a>
+        <% } %>
+        <% if (currentUser.rol === 'admin') { %>
+          <form method="post" action="/clinico/registros/<%= r.id %>/eliminar" class="inline" data-confirm="¿Eliminar este registro del historial clínico?">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn-small btn-danger" type="submit">Eliminar</button>
+          </form>
+        <% } %>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<p class="muted"><%= registros.length %> registro(s)<%= registros.length >= 500 ? ' (se muestran los 500 más recientes; usa los filtros)' : '' %>.</p>
+<% } %>
+<%- include('partials/footer') %>

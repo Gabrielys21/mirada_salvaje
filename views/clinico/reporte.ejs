@@ -1,0 +1,60 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Control clínico</h1>
+</div>
+<%- include('partials/clinico-tabs') %>
+
+<form class="filters card no-print" method="get" action="/clinico/reporte">
+  <label>Próximos
+    <select name="dias">
+      <% horizontes.forEach((d) => { %>
+        <option value="<%= d %>" <%= filtros.dias === d ? 'selected' : '' %>><%= d %> días</option>
+      <% }) %>
+    </select>
+  </label>
+  <label>Animal
+    <select name="animal_id">
+      <option value="">Todos</option>
+      <% animales.forEach((a) => { %>
+        <option value="<%= a.id %>" <%= filtros.animalId === a.id ? 'selected' : '' %>><%= a.nombre %> (<%= a.especie %>)</option>
+      <% }) %>
+    </select>
+  </label>
+  <label>Tipo
+    <select name="tipo">
+      <option value="">Todos</option>
+      <% Object.entries(tipos).forEach(([valor, etiqueta]) => { %>
+        <option value="<%= valor %>" <%= filtros.tipo === valor ? 'selected' : '' %>><%= etiqueta %></option>
+      <% }) %>
+    </select>
+  </label>
+  <div class="filters-actions">
+    <button class="btn btn-primary" type="submit">Generar</button>
+    <button class="btn" type="submit" name="formato" value="csv">Exportar CSV</button>
+    <button class="btn" type="button" data-print>Imprimir</button>
+  </div>
+</form>
+
+<section class="report">
+  <h2>Aplicaciones pendientes al <%= h.fecha(h.hoy()) %> (hasta el <%= h.fecha(hasta) %>)</h2>
+
+  <div class="stats">
+    <div class="stat <%= vencidas.length ? 'stat-alerta' : '' %>"><span class="stat-num"><%= vencidas.length %></span><span class="stat-label">Vencidas</span></div>
+    <div class="stat"><span class="stat-num"><%= estaSemana %></span><span class="stat-label">En los próximos 7 días</span></div>
+    <div class="stat"><span class="stat-num"><%= proximas.length %></span><span class="stat-label">En los próximos <%= filtros.dias %> días</span></div>
+  </div>
+
+  <% if (vencidas.length) { %>
+    <h3>⚠️ Vencidas</h3>
+    <%- include('partials/clinico-pendientes', { lista: vencidas, mostrarAnimal: true }) %>
+  <% } %>
+
+  <h3>Próximas</h3>
+  <% if (!proximas.length) { %>
+    <p class="empty">No hay aplicaciones programadas en los próximos <%= filtros.dias %> días.</p>
+  <% } else { %>
+    <%- include('partials/clinico-pendientes', { lista: proximas, mostrarAnimal: true }) %>
+  <% } %>
+  <p class="muted">Se consideran atendidas las aplicaciones a las que ya se registró una dosis posterior del mismo producto. No se incluyen animales inactivos.</p>
+</section>
+<%- include('partials/footer') %>

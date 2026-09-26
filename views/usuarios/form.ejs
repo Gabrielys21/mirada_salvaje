@@ -1,0 +1,53 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1><%= title %></h1>
+</div>
+
+<section class="card form-card">
+  <%- include('partials/errores') %>
+  <% const esUnoMismo = usuario.id === currentUser.id; %>
+  <form method="post" action="/usuarios<%= usuario.id ? '/' + usuario.id : '' %>" class="form" autocomplete="off">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <label>Nombre completo *
+      <input type="text" name="nombre" value="<%= usuario.nombre %>" maxlength="100" required>
+    </label>
+
+    <label>Usuario *
+      <% if (usuario.id) { %>
+        <input type="text" value="<%= usuario.username %>" disabled>
+      <% } else { %>
+        <input type="text" name="username" value="<%= usuario.username %>" maxlength="50" pattern="[a-zA-Z0-9._\-]{3,50}" required>
+      <% } %>
+    </label>
+
+    <label>Rol *
+      <select name="rol" <%= esUnoMismo ? 'disabled' : '' %> required>
+        <% Object.entries(roles).forEach(([valor, etiqueta]) => { %>
+          <option value="<%= valor %>" <%= usuario.rol === valor ? 'selected' : '' %>><%= etiqueta %></option>
+        <% }) %>
+      </select>
+      <% if (esUnoMismo) { %>
+        <input type="hidden" name="rol" value="<%= usuario.rol %>">
+        <small class="muted">No puedes cambiar tu propio rol.</small>
+      <% } %>
+    </label>
+
+    <label><%= usuario.id ? 'Nueva contraseña (dejar vacío para no cambiarla)' : 'Contraseña *' %>
+      <input type="password" name="password" minlength="<%= minimoPassword %>" maxlength="72" autocomplete="new-password" <%= usuario.id ? '' : 'required' %>>
+    </label>
+    <label>Confirmar contraseña
+      <input type="password" name="password_confirmacion" maxlength="72" autocomplete="new-password" <%= usuario.id ? '' : 'required' %>>
+    </label>
+
+    <% if (usuario.id && !esUnoMismo) { %>
+      <label class="check"><input type="checkbox" name="activo" <%= usuario.activo ? 'checked' : '' %>> Usuario activo</label>
+    <% } %>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Guardar</button>
+      <a class="btn btn-link" href="/usuarios">Cancelar</a>
+    </div>
+  </form>
+</section>
+<%- include('partials/footer') %>

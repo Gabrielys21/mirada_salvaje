@@ -1,0 +1,67 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Alimentación</h1>
+</div>
+<%- include('partials/alimentacion-tabs') %>
+
+<form class="filters card no-print" method="get" action="/alimentacion/reporte">
+  <label>Desde <input type="date" name="desde" value="<%= filtros.desde %>" required></label>
+  <label>Hasta <input type="date" name="hasta" value="<%= filtros.hasta %>" required></label>
+  <label>Tipo de alimento
+    <select name="tipo">
+      <option value="">Todos</option>
+      <% Object.entries(tipos).forEach(([valor, etiqueta]) => { %>
+        <option value="<%= valor %>" <%= filtros.tipoAlimento === valor ? 'selected' : '' %>><%= etiqueta %></option>
+      <% }) %>
+    </select>
+  </label>
+  <div class="filters-actions">
+    <button class="btn btn-primary" type="submit">Generar</button>
+    <button class="btn" type="submit" name="formato" value="csv">Exportar CSV</button>
+    <button class="btn" type="button" data-print>Imprimir</button>
+  </div>
+</form>
+
+<section class="report">
+  <h2>Reporte de alimentación del <%= h.fecha(filtros.desde) %> al <%= h.fecha(filtros.hasta) %></h2>
+
+  <% if (alertas.length) { %>
+    <div class="alert alert-aviso" role="alert">
+      <strong>⚠️ Alerta de stock:</strong>
+      <ul>
+        <% alertas.forEach((f) => { %>
+          <li><%= f.nombre %>: <%= h.cantidad(f.stock) %> <%= f.unidad %> (mínimo <%= h.cantidad(f.stock_minimo) %>)<%= f.dias_cobertura !== null ? ` — alcanza para ${f.dias_cobertura} día(s)` : '' %></li>
+        <% }) %>
+      </ul>
+    </div>
+  <% } %>
+
+  <% if (!filas.length) { %>
+    <p class="empty">No hay alimentos en el inventario.</p>
+  <% } else { %>
+  <div class="table-wrap">
+  <table class="table">
+    <thead>
+      <tr><th>Alimento</th><th>Tipo</th><th class="num">Entradas</th><th class="num">Salidas</th><th class="num">Stock actual</th><th class="num">Mínimo</th><th class="num">Consumo diario</th><th class="num">Días de cobertura</th><th>Estado</th></tr>
+    </thead>
+    <tbody>
+    <% filas.forEach((f) => { %>
+      <tr class="<%= f.estado_stock === 'ok' ? '' : 'row-warning' %>">
+        <td><%= f.nombre %></td>
+        <td><%= tipos[f.tipo] %></td>
+        <td class="num"><%= h.cantidad(f.entradas) %> <%= f.unidad %></td>
+        <td class="num"><%= h.cantidad(f.salidas) %> <%= f.unidad %></td>
+        <td class="num"><strong><%= h.cantidad(f.stock) %></strong> <%= f.unidad %></td>
+        <td class="num"><%= h.cantidad(f.stock_minimo) %></td>
+        <td class="num"><%= f.consumo_diario ? h.cantidad(f.consumo_diario) : '—' %></td>
+        <td class="num"><%= f.dias_cobertura ?? '—' %></td>
+        <td><span class="badge badge-<%= f.estado_stock %>"><%= estadosStock[f.estado_stock] %></span></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  </div>
+  <p class="muted">Entradas y salidas corresponden al periodo seleccionado. El stock y el consumo diario (suma de las raciones de animales activos) son los actuales.</p>
+  <% } %>
+</section>
+<%- include('partials/footer') %>

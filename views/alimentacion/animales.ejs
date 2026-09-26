@@ -1,0 +1,63 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Alimentación</h1>
+  <% if (currentUser.rol === 'admin') { %>
+    <a class="btn btn-primary" href="/alimentacion/animales/nuevo">+ Nuevo animal</a>
+  <% } %>
+</div>
+<%- include('partials/alimentacion-tabs') %>
+
+<form class="filters card" method="get" action="/alimentacion/animales">
+  <label>Buscar <input type="search" name="texto" value="<%= filtros.texto %>" placeholder="Nombre o especie" maxlength="100"></label>
+  <label>Área
+    <select name="area_id">
+      <option value="">Todas</option>
+      <% areas.forEach((a) => { %>
+        <option value="<%= a.id %>" <%= filtros.areaId === a.id ? 'selected' : '' %>><%= a.nombre %></option>
+      <% }) %>
+    </select>
+  </label>
+  <label>Estado
+    <select name="estado">
+      <option value="activos" <%= filtros.estado === 'activos' ? 'selected' : '' %>>Activos</option>
+      <option value="inactivos" <%= filtros.estado === 'inactivos' ? 'selected' : '' %>>Inactivos</option>
+      <option value="todos" <%= filtros.estado === 'todos' ? 'selected' : '' %>>Todos</option>
+    </select>
+  </label>
+  <div class="filters-actions">
+    <button class="btn" type="submit">Filtrar</button>
+    <a class="btn btn-link" href="/alimentacion/animales">Limpiar</a>
+  </div>
+</form>
+
+<% if (!animales.length) { %>
+  <p class="empty">No hay animales con esos filtros.</p>
+<% } else { %>
+<div class="table-wrap">
+<table class="table">
+  <thead>
+    <tr><th>Nombre</th><th>Especie</th><th>Sexo</th><th>Nacimiento</th><th>Área</th><th class="num">Dietas</th><th class="actions">Acciones</th></tr>
+  </thead>
+  <tbody>
+  <% animales.forEach((a) => { %>
+    <tr class="<%= a.activo ? '' : 'row-muted' %>">
+      <td><a href="/alimentacion/animales/<%= a.id %>"><%= a.nombre %></a><%= a.activo ? '' : ' (inactivo)' %></td>
+      <td><%= a.especie %></td>
+      <td><%= sexos[a.sexo] || '—' %></td>
+      <td><%= a.fecha_nacimiento ? h.fecha(a.fecha_nacimiento) : '—' %></td>
+      <td><%= a.area_nombre || '—' %></td>
+      <td class="num"><a href="/alimentacion/dietas?animal_id=<%= a.id %>"><%= a.total_dietas %></a></td>
+      <td class="actions">
+        <a class="btn btn-small" href="/alimentacion/animales/<%= a.id %>">Ver</a>
+        <% if (currentUser.rol === 'admin') { %>
+          <a class="btn btn-small" href="/alimentacion/animales/<%= a.id %>/editar">Editar</a>
+        <% } %>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<p class="muted"><%= animales.length %> animal(es).</p>
+<% } %>
+<%- include('partials/footer') %>

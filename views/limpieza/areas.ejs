@@ -1,0 +1,44 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Limpieza</h1>
+  <% if (currentUser.rol === 'admin') { %>
+    <a class="btn btn-primary" href="/limpieza/areas/nueva">+ Nueva área</a>
+  <% } %>
+</div>
+<%- include('partials/limpieza-tabs') %>
+
+<% if (!areas.length) { %>
+  <p class="empty">No hay áreas registradas.</p>
+<% } else { %>
+<div class="table-wrap">
+<table class="table">
+  <thead>
+    <tr><th>Nombre</th><th>Tipo</th><th>Descripción</th><th>Estado</th><th>Registros</th><th class="actions">Acciones</th></tr>
+  </thead>
+  <tbody>
+  <% areas.forEach((a) => { %>
+    <tr class="<%= a.activo ? '' : 'row-muted' %>">
+      <td><%= a.nombre %></td>
+      <td><%= tipos[a.tipo] %></td>
+      <td class="wrap"><%= a.descripcion || '—' %></td>
+      <td><span class="badge <%= a.activo ? 'badge-completado' : 'badge-inactivo' %>"><%= a.activo ? 'Activa' : 'Inactiva' %></span></td>
+      <td><a href="/limpieza/registros?area_id=<%= a.id %>"><%= a.total_registros %></a></td>
+      <td class="actions">
+        <% if (a.activo) { %>
+          <a class="btn btn-small" href="/limpieza/registros/nuevo?area_id=<%= a.id %>">Registrar limpieza</a>
+        <% } %>
+        <% if (currentUser.rol === 'admin') { %>
+          <a class="btn btn-small" href="/limpieza/areas/<%= a.id %>/editar">Editar</a>
+          <form method="post" action="/limpieza/areas/<%= a.id %>/eliminar" class="inline" data-confirm="¿Eliminar el área «<%= a.nombre %>»?">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn-small btn-danger" type="submit">Eliminar</button>
+          </form>
+        <% } %>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<% } %>
+<%- include('partials/footer') %>

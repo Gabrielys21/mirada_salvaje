@@ -1,0 +1,46 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1><%= title %></h1>
+</div>
+<%- include('partials/alimentacion-tabs') %>
+
+<section class="card form-card">
+  <%- include('partials/errores') %>
+  <% if (!alimentos.length) { %>
+    <div class="alert alert-aviso">Todavía no hay alimentos en el inventario.</div>
+  <% } %>
+  <form method="post" action="/alimentacion/movimientos" class="form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <label>Tipo de movimiento *
+      <select name="tipo" required>
+        <% Object.entries(tipos).forEach(([valor, etiqueta]) => { %>
+          <option value="<%= valor %>" <%= movimiento.tipo === valor ? 'selected' : '' %>><%= etiqueta %><%= valor === 'entrada' ? ' (compra / donación)' : ' (consumo / merma)' %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Alimento *
+      <select name="alimento_id" required>
+        <option value="">Selecciona un alimento…</option>
+        <% alimentos.forEach((al) => { %>
+          <option value="<%= al.id %>" <%= movimiento.alimento_id === al.id ? 'selected' : '' %>><%= al.nombre %> — stock: <%= h.cantidad(al.stock) %> <%= al.unidad %><%= al.estado_stock === 'ok' ? '' : ' ⚠' %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Cantidad *
+      <input type="number" name="cantidad" value="<%= movimiento.cantidad %>" min="0.01" step="0.01" required>
+    </label>
+    <label>Fecha *
+      <input type="date" name="fecha" value="<%= movimiento.fecha || '' %>" max="<%= h.hoy() %>" required>
+    </label>
+    <label>Observaciones
+      <input type="text" name="observaciones" value="<%= movimiento.observaciones || '' %>" maxlength="255" placeholder="Ej. Factura 1234, proveedor…">
+    </label>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Registrar</button>
+      <a class="btn btn-link" href="/alimentacion/inventario">Cancelar</a>
+    </div>
+  </form>
+</section>
+<%- include('partials/footer') %>

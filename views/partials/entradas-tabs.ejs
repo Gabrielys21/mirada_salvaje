@@ -1,0 +1,7 @@
+<nav class="tabs no-print">
+  <a href="/entradas/ventas/nueva" class="<%= currentPath === '/entradas/ventas/nueva' ? 'active' : '' %>">Vender</a>
+  <a href="/entradas/ventas" class="<%= currentPath.startsWith('/entradas/ventas') && currentPath !== '/entradas/ventas/nueva' ? 'active' : '' %>">Ventas</a>
+  <a href="/entradas/tipos" class="<%= currentPath.startsWith('/entradas/tipos') ? 'active' : '' %>">Tipos de entrada</a>
+  <a href="/entradas/promociones" class="<%= currentPath.startsWith('/entradas/promociones') ? 'active' : '' %>">Promociones</a>
+  <a href="/entradas/reporte" class="<%= currentPath.startsWith('/entradas/reporte') ? 'active' : '' %>">Reporte</a>
+</nav>

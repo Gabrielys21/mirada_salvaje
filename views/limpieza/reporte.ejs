@@ -1,0 +1,87 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Limpieza</h1>
+</div>
+<%- include('partials/limpieza-tabs') %>
+
+<form class="filters card no-print" method="get" action="/limpieza/reporte">
+  <label>Desde <input type="date" name="desde" value="<%= filtros.desde %>" required></label>
+  <label>Hasta <input type="date" name="hasta" value="<%= filtros.hasta %>" required></label>
+  <label>Área
+    <select name="area_id">
+      <option value="">Todas</option>
+      <% areas.forEach((a) => { %>
+        <option value="<%= a.id %>" <%= filtros.areaId === a.id ? 'selected' : '' %>><%= a.nombre %></option>
+      <% }) %>
+    </select>
+  </label>
+  <label>Estado
+    <select name="estado">
+      <option value="">Todos</option>
+      <% Object.entries(estados).forEach(([valor, etiqueta]) => { %>
+        <option value="<%= valor %>" <%= filtros.estado === valor ? 'selected' : '' %>><%= etiqueta %></option>
+      <% }) %>
+    </select>
+  </label>
+  <div class="filters-actions">
+    <button class="btn btn-primary" type="submit">Generar</button>
+    <button class="btn" type="submit" name="formato" value="csv">Exportar CSV</button>
+    <button class="btn" type="button" data-print>Imprimir</button>
+  </div>
+</form>
+
+<section class="report">
+  <h2>Reporte de limpieza del <%= h.fecha(filtros.desde) %> al <%= h.fecha(filtros.hasta) %></h2>
+
+  <div class="stats">
+    <div class="stat"><span class="stat-num"><%= totales.total %></span><span class="stat-label">Registros</span></div>
+    <div class="stat"><span class="stat-num"><%= totales.completados %></span><span class="stat-label">Completados</span></div>
+    <div class="stat"><span class="stat-num"><%= totales.pendientes %></span><span class="stat-label">Pendientes</span></div>
+    <div class="stat">
+      <span class="stat-num"><%= totales.total ? Math.round((totales.completados / totales.total) * 100) : 0 %>%</span>
+      <span class="stat-label">Cumplimiento</span>
+    </div>
+  </div>
+
+  <% if (!resumen.length) { %>
+    <p class="empty">No hay registros de limpieza en ese periodo.</p>
+  <% } else { %>
+  <h3>Resumen por área</h3>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Área</th><th>Tipo</th><th class="num">Total</th><th class="num">Completados</th><th class="num">Pendientes</th><th class="num">Cumplimiento</th></tr></thead>
+    <tbody>
+    <% resumen.forEach((fila) => { %>
+      <tr>
+        <td><%= fila.nombre %></td>
+        <td><%= tipos[fila.tipo] %></td>
+        <td class="num"><%= fila.total %></td>
+        <td class="num"><%= fila.completados %></td>
+        <td class="num"><%= fila.pendientes %></td>
+        <td class="num"><%= Math.round((fila.completados / fila.total) * 100) %>%</td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Detalle</h3>
+  <div class="table-wrap">
+  <table class="table">
+    <thead><tr><th>Fecha</th><th>Área</th><th>Encargado</th><th>Estado</th><th>Observaciones</th></tr></thead>
+    <tbody>
+    <% detalle.forEach((r) => { %>
+      <tr>
+        <td><%= h.fecha(r.fecha) %></td>
+        <td><%= r.area_nombre %></td>
+        <td><%= r.encargado_nombre %></td>
+        <td><span class="badge badge-<%= r.estado %>"><%= estados[r.estado] %></span></td>
+        <td class="wrap"><%= r.observaciones || '—' %></td>
+      </tr>
+    <% }) %>
+    </tbody>
+  </table>
+  </div>
+  <% } %>
+</section>
+<%- include('partials/footer') %>

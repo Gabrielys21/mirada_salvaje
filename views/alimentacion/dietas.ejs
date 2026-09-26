@@ -1,0 +1,64 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Alimentación</h1>
+  <% if (currentUser.rol === 'admin') { %>
+    <a class="btn btn-primary" href="/alimentacion/dietas/nueva<%= filtros.animalId ? '?animal_id=' + filtros.animalId : '' %>">+ Nueva dieta</a>
+  <% } %>
+</div>
+<%- include('partials/alimentacion-tabs') %>
+
+<form class="filters card" method="get" action="/alimentacion/dietas">
+  <label>Animal
+    <select name="animal_id">
+      <option value="">Todos</option>
+      <% animales.forEach((a) => { %>
+        <option value="<%= a.id %>" <%= filtros.animalId === a.id ? 'selected' : '' %>><%= a.nombre %> (<%= a.especie %>)<%= a.activo ? '' : ' — inactivo' %></option>
+      <% }) %>
+    </select>
+  </label>
+  <label>Alimento
+    <select name="alimento_id">
+      <option value="">Todos</option>
+      <% alimentos.forEach((al) => { %>
+        <option value="<%= al.id %>" <%= filtros.alimentoId === al.id ? 'selected' : '' %>><%= al.nombre %></option>
+      <% }) %>
+    </select>
+  </label>
+  <div class="filters-actions">
+    <button class="btn" type="submit">Filtrar</button>
+    <a class="btn btn-link" href="/alimentacion/dietas">Limpiar</a>
+  </div>
+</form>
+
+<% if (!dietas.length) { %>
+  <p class="empty">No hay dietas registradas con esos filtros.</p>
+<% } else { %>
+<div class="table-wrap">
+<table class="table">
+  <thead>
+    <tr><th>Animal</th><th>Horario</th><th>Alimento</th><th class="num">Cantidad</th><th>Observaciones</th><% if (currentUser.rol === 'admin') { %><th class="actions">Acciones</th><% } %></tr>
+  </thead>
+  <tbody>
+  <% dietas.forEach((d) => { %>
+    <tr class="<%= d.animal_activo ? '' : 'row-muted' %>">
+      <td><a href="/alimentacion/animales/<%= d.animal_id %>"><%= d.animal_nombre %></a><br><small class="muted"><%= d.especie %></small></td>
+      <td><%= h.hora(d.horario) %></td>
+      <td><%= d.alimento_nombre %></td>
+      <td class="num"><%= h.cantidad(d.cantidad) %> <%= d.unidad %></td>
+      <td class="wrap"><%= d.observaciones || '—' %></td>
+      <% if (currentUser.rol === 'admin') { %>
+      <td class="actions">
+        <a class="btn btn-small" href="/alimentacion/dietas/<%= d.id %>/editar">Editar</a>
+        <form method="post" action="/alimentacion/dietas/<%= d.id %>/eliminar" class="inline" data-confirm="¿Eliminar esta ración de la dieta?">
+          <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+          <button class="btn btn-small btn-danger" type="submit">Eliminar</button>
+        </form>
+      </td>
+      <% } %>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<% } %>
+<%- include('partials/footer') %>

@@ -1,0 +1,44 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1><%= title %></h1>
+</div>
+<%- include('partials/limpieza-tabs') %>
+
+<section class="card form-card">
+  <%- include('partials/errores') %>
+  <form method="post" action="/limpieza/areas<%= area.id ? '/' + area.id : '' %>" class="form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <label>Nombre *
+      <input type="text" name="nombre" value="<%= area.nombre %>" maxlength="100" required>
+    </label>
+
+    <label>Tipo *
+      <select name="tipo" required>
+        <option value="">Selecciona un tipo…</option>
+        <% Object.entries(tipos).forEach(([valor, etiqueta]) => { %>
+          <option value="<%= valor %>" <%= area.tipo === valor ? 'selected' : '' %>><%= etiqueta %></option>
+        <% }) %>
+      </select>
+    </label>
+
+    <label>Descripción
+      <input type="text" name="descripcion" value="<%= area.descripcion || '' %>" maxlength="255">
+    </label>
+
+    <% if (area.id) { %>
+      <label class="check">
+        <input type="checkbox" name="activo" <%= area.activo ? 'checked' : '' %>> Área activa
+      </label>
+      <small class="muted">Las áreas inactivas no aparecen al crear nuevos registros, pero conservan su historial.</small>
+    <% } else { %>
+      <input type="hidden" name="activo" value="on">
+    <% } %>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Guardar</button>
+      <a class="btn btn-link" href="/limpieza/areas">Cancelar</a>
+    </div>
+  </form>
+</section>
+<%- include('partials/footer') %>

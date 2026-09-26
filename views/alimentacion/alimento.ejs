@@ -1,0 +1,75 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1><%= alimento.nombre %> <span class="badge badge-<%= alimento.estado_stock %>"><%= estadosStock[alimento.estado_stock] %></span></h1>
+  <div class="form-actions">
+    <a class="btn btn-success" href="/alimentacion/movimientos/nuevo?alimento_id=<%= alimento.id %>&tipo=entrada">+ Entrada</a>
+    <a class="btn" href="/alimentacion/movimientos/nuevo?alimento_id=<%= alimento.id %>&tipo=salida">− Salida</a>
+    <% if (currentUser.rol === 'admin') { %>
+      <a class="btn" href="/alimentacion/inventario/<%= alimento.id %>/editar">Editar</a>
+      <form method="post" action="/alimentacion/inventario/<%= alimento.id %>/eliminar" class="inline" data-confirm="¿Eliminar «<%= alimento.nombre %>» del inventario?">
+        <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+        <button class="btn btn-danger" type="submit">Eliminar</button>
+      </form>
+    <% } %>
+  </div>
+</div>
+<%- include('partials/alimentacion-tabs') %>
+
+<div class="stats">
+  <div class="stat <%= alimento.estado_stock === 'ok' ? '' : 'stat-alerta' %>">
+    <span class="stat-num"><%= h.cantidad(alimento.stock) %></span><span class="stat-label">Stock actual (<%= unidades[alimento.unidad] %>)</span>
+  </div>
+  <div class="stat"><span class="stat-num"><%= h.cantidad(alimento.stock_minimo) %></span><span class="stat-label">Stock mínimo</span></div>
+  <div class="stat"><span class="stat-num"><%= h.cantidad(alimento.consumo_diario) %></span><span class="stat-label">Consumo diario programado</span></div>
+  <div class="stat">
+    <span class="stat-num"><%= alimento.consumo_diario > 0 ? Math.floor(alimento.stock / alimento.consumo_diario) : '—' %></span>
+    <span class="stat-label">Días de cobertura</span>
+  </div>
+</div>
+<p class="muted">Tipo: <%= tipos[alimento.tipo] %></p>
+
+<h2>Dietas que lo usan</h2>
+<% if (!dietas.length) { %>
+  <p class="empty">Ninguna dieta usa este alimento.</p>
+<% } else { %>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Animal</th><th>Horario</th><th class="num">Cantidad</th></tr></thead>
+  <tbody>
+  <% dietas.forEach((d) => { %>
+    <tr class="<%= d.animal_activo ? '' : 'row-muted' %>">
+      <td><a href="/alimentacion/animales/<%= d.animal_id %>"><%= d.animal_nombre %></a> <small class="muted"><%= d.especie %></small></td>
+      <td><%= h.hora(d.horario) %></td>
+      <td class="num"><%= h.cantidad(d.cantidad) %> <%= d.unidad %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<% } %>
+
+<div class="page-head">
+  <h2>Últimos movimientos</h2>
+  <a class="btn btn-link" href="/alimentacion/movimientos?alimento_id=<%= alimento.id %>">Ver todos</a>
+</div>
+<% if (!movimientos.length) { %>
+  <p class="empty">Sin movimientos registrados.</p>
+<% } else { %>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>Fecha</th><th>Tipo</th><th class="num">Cantidad</th><th>Registró</th><th>Observaciones</th></tr></thead>
+  <tbody>
+  <% movimientos.forEach((m) => { %>
+    <tr>
+      <td><%= h.fecha(m.fecha) %></td>
+      <td><span class="badge badge-<%= m.tipo %>"><%= tiposMovimiento[m.tipo] %></span></td>
+      <td class="num"><%= m.tipo === 'salida' ? '−' : '+' %><%= h.cantidad(m.cantidad) %> <%= m.unidad %></td>
+      <td><%= m.usuario_nombre %></td>
+      <td class="wrap"><%= m.observaciones || '—' %></td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<% } %>
+<%- include('partials/footer') %>

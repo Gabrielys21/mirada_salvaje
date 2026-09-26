@@ -1,0 +1,64 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Entradas</h1>
+  <a class="btn btn-primary" href="/entradas/ventas/nueva">+ Nueva venta</a>
+</div>
+<%- include('partials/entradas-tabs') %>
+
+<form class="filters card" method="get" action="/entradas/ventas">
+  <label>Desde <input type="date" name="desde" value="<%= filtros.desde %>"></label>
+  <label>Hasta <input type="date" name="hasta" value="<%= filtros.hasta %>"></label>
+  <label>Tipo de entrada
+    <select name="tipo_entrada_id">
+      <option value="">Todos</option>
+      <% tipos.forEach((t) => { %>
+        <option value="<%= t.id %>" <%= filtros.tipoEntradaId === t.id ? 'selected' : '' %>><%= t.nombre %></option>
+      <% }) %>
+    </select>
+  </label>
+  <div class="filters-actions">
+    <button class="btn" type="submit">Filtrar</button>
+    <a class="btn btn-link" href="/entradas/ventas">Hoy</a>
+  </div>
+</form>
+
+<div class="stats">
+  <div class="stat"><span class="stat-num"><%= h.moneda(totales.ingresos) %></span><span class="stat-label">Ingresos</span></div>
+  <div class="stat"><span class="stat-num"><%= totales.boletos %></span><span class="stat-label">Boletos vendidos</span></div>
+  <div class="stat"><span class="stat-num"><%= totales.ventas %></span><span class="stat-label">Ventas</span></div>
+</div>
+
+<% if (!ventas.length) { %>
+  <p class="empty">No hay ventas en ese periodo.</p>
+<% } else { %>
+<div class="table-wrap">
+<table class="table">
+  <thead><tr><th>No.</th><th>Fecha y hora</th><th>Entrada</th><th class="num">Cant.</th><th class="num">P. unitario</th><th>Promoción</th><th class="num">Total</th><th>Vendedor</th><th class="actions">Acciones</th></tr></thead>
+  <tbody>
+  <% ventas.forEach((v) => { %>
+    <tr>
+      <td><a href="/entradas/ventas/<%= v.id %>">#<%= v.id %></a></td>
+      <td><%= h.fechaHora(v.fecha) %></td>
+      <td><%= v.tipo_entrada_nombre %></td>
+      <td class="num"><%= v.cantidad %></td>
+      <td class="num"><%= h.moneda(v.precio_unitario) %></td>
+      <td><%= v.promocion_nombre ? `${v.promocion_nombre} (−${h.cantidad(v.porcentaje_descuento)}%)` : '—' %></td>
+      <td class="num"><strong><%= h.moneda(v.total) %></strong></td>
+      <td><%= v.vendedor_nombre %></td>
+      <td class="actions">
+        <a class="btn btn-small" href="/entradas/ventas/<%= v.id %>">Comprobante</a>
+        <% if (currentUser.rol === 'admin') { %>
+          <form method="post" action="/entradas/ventas/<%= v.id %>/eliminar" class="inline" data-confirm="¿Anular la venta #<%= v.id %>?">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn-small btn-danger" type="submit">Anular</button>
+          </form>
+        <% } %>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<p class="muted"><%= ventas.length %> venta(s)<%= ventas.length >= 500 ? ' (se muestran las 500 más recientes; los totales sí incluyen todo el periodo)' : '' %>.</p>
+<% } %>
+<%- include('partials/footer') %>

@@ -1,0 +1,35 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1><%= title %></h1>
+</div>
+<%- include('partials/entradas-tabs') %>
+
+<section class="card form-card">
+  <%- include('partials/errores') %>
+  <form method="post" action="/entradas/tipos<%= tipo.id ? '/' + tipo.id : '' %>" class="form">
+    <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+
+    <label>Nombre *
+      <input type="text" name="nombre" value="<%= tipo.nombre %>" maxlength="50" required placeholder="Ej. General, Estudiante, Niño">
+    </label>
+    <label>Precio (Q) *
+      <input type="number" name="precio" value="<%= tipo.precio %>" min="0" step="0.01" required>
+      <% if (tipo.id) { %><small class="muted">Cambiar el precio no afecta las ventas ya registradas.</small><% } %>
+    </label>
+    <label>Descripción
+      <input type="text" name="descripcion" value="<%= tipo.descripcion || '' %>" maxlength="255" placeholder="Ej. Presentando carné vigente">
+    </label>
+
+    <% if (tipo.id) { %>
+      <label class="check"><input type="checkbox" name="activo" <%= tipo.activo ? 'checked' : '' %>> Tipo de entrada activo (disponible para la venta)</label>
+    <% } else { %>
+      <input type="hidden" name="activo" value="on">
+    <% } %>
+
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">Guardar</button>
+      <a class="btn btn-link" href="/entradas/tipos">Cancelar</a>
+    </div>
+  </form>
+</section>
+<%- include('partials/footer') %>

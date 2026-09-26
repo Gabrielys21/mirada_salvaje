@@ -1,0 +1,80 @@
+<%- include('partials/header') %>
+<div class="page-head">
+  <h1>Limpieza</h1>
+  <a class="btn btn-primary" href="/limpieza/registros/nuevo">+ Nuevo registro</a>
+</div>
+<%- include('partials/limpieza-tabs') %>
+
+<form class="filters card" method="get" action="/limpieza/registros">
+  <label>Desde <input type="date" name="desde" value="<%= filtros.desde || '' %>"></label>
+  <label>Hasta <input type="date" name="hasta" value="<%= filtros.hasta || '' %>"></label>
+  <label>Área
+    <select name="area_id">
+      <option value="">Todas</option>
+      <% areas.forEach((a) => { %>
+        <option value="<%= a.id %>" <%= filtros.areaId === a.id ? 'selected' : '' %>><%= a.nombre %></option>
+      <% }) %>
+    </select>
+  </label>
+  <label>Estado
+    <select name="estado">
+      <option value="">Todos</option>
+      <% Object.entries(estados).forEach(([valor, etiqueta]) => { %>
+        <option value="<%= valor %>" <%= filtros.estado === valor ? 'selected' : '' %>><%= etiqueta %></option>
+      <% }) %>
+    </select>
+  </label>
+  <label class="check"><input type="checkbox" name="mias" value="1" <%= filtros.mias ? 'checked' : '' %>> Solo mis tareas</label>
+  <div class="filters-actions">
+    <button class="btn" type="submit">Filtrar</button>
+    <a class="btn btn-link" href="/limpieza/registros">Limpiar</a>
+  </div>
+</form>
+
+<% if (!registros.length) { %>
+  <p class="empty">No hay registros de limpieza con esos filtros.</p>
+<% } else { %>
+<div class="table-wrap">
+<table class="table">
+  <thead>
+    <tr><th>Fecha</th><th>Área</th><th>Encargado</th><th>Estado</th><th>Observaciones</th><th class="actions">Acciones</th></tr>
+  </thead>
+  <tbody>
+  <% registros.forEach((r) => {
+       const puede = currentUser.rol === 'admin' || r.encargado_id === currentUser.id;
+       const atrasado = r.estado === 'pendiente' && r.fecha < h.hoy(); %>
+    <tr class="<%= atrasado ? 'row-warning' : '' %>">
+      <td><%= h.fecha(r.fecha) %></td>
+      <td><%= r.area_nombre %><br><small class="muted"><%= tipos[r.area_tipo] %></small></td>
+      <td><%= r.encargado_nombre %></td>
+      <td>
+        <span class="badge badge-<%= r.estado %>"><%= estados[r.estado] %></span>
+        <% if (atrasado) { %><small class="text-warning">Atrasado</small><% } %>
+      </td>
+      <td class="wrap"><%= r.observaciones || '—' %></td>
+      <td class="actions">
+        <% if (puede) { %>
+          <% if (r.estado === 'pendiente') { %>
+            <form method="post" action="/limpieza/registros/<%= r.id %>/completar" class="inline">
+              <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+              <input type="hidden" name="volver" value="<%= currentUrl %>">
+              <button class="btn btn-small btn-success" type="submit">Completar</button>
+            </form>
+          <% } %>
+          <a class="btn btn-small" href="/limpieza/registros/<%= r.id %>/editar">Editar</a>
+        <% } %>
+        <% if (currentUser.rol === 'admin') { %>
+          <form method="post" action="/limpieza/registros/<%= r.id %>/eliminar" class="inline" data-confirm="¿Eliminar este registro de limpieza?">
+            <input type="hidden" name="_csrf" value="<%= csrfToken %>">
+            <button class="btn btn-small btn-danger" type="submit">Eliminar</button>
+          </form>
+        <% } %>
+      </td>
+    </tr>
+  <% }) %>
+  </tbody>
+</table>
+</div>
+<p class="muted"><%= registros.length %> registro(s)<%= registros.length >= 500 ? ' (se muestran los 500 más recientes; usa los filtros)' : '' %>.</p>
+<% } %>
+<%- include('partials/footer') %>

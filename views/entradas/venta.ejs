@@ -1,0 +1,25 @@
+<%- include('partials/header') %>
+<div class="page-head no-print">
+  <h1>Venta registrada</h1>
+  <div class="form-actions">
+    <button class="btn" type="button" data-print>Imprimir comprobante</button>
+    <a class="btn btn-primary" href="/entradas/ventas/nueva">Nueva venta</a>
+  </div>
+</div>
+<%- include('partials/entradas-tabs') %>
+
+<section class="card comprobante">
+  <h2>🦁 Zoológico Mirada Salvaje</h2>
+  <p class="muted">Comprobante de venta No. <strong><%= venta.id %></strong> · <%= h.fechaHora(venta.fecha) %></p>
+  <dl class="detail">
+    <dt>Entrada</dt><dd><%= venta.tipo_entrada_nombre %></dd>
+    <dt>Cantidad</dt><dd><%= venta.cantidad %></dd>
+    <dt>Precio unitario</dt><dd><%= h.moneda(venta.precio_unitario) %></dd>
+    <dt>Subtotal</dt><dd><%= h.moneda(venta.precio_unitario * venta.cantidad) %></dd>
+    <dt>Promoción</dt><dd><%= venta.promocion_nombre ? `${venta.promocion_nombre} (−${h.cantidad(venta.porcentaje_descuento)}%)` : (venta.porcentaje_descuento > 0 ? `−${h.cantidad(venta.porcentaje_descuento)}%` : 'Ninguna') %></dd>
+    <dt>Descuento</dt><dd><%= h.moneda(venta.descuento) %></dd>
+    <dt><strong>Total</strong></dt><dd><strong class="total"><%= h.moneda(venta.total) %></strong></dd>
+    <dt>Atendió</dt><dd><%= venta.vendedor_nombre %></dd>
+  </dl>
+</section>
+<%- include('partials/footer') %>
